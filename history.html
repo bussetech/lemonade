@@ -1,0 +1,81 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The story of Lemonade Stand — Bussetech Software Studio</title>
+
+<style>
+  :root {
+    --cream: #fff9e6;
+    --panel: #fffdf5;
+    --yellow-deep: #e0a80f;
+    --ink: #2b2617;
+    --ink-soft: #6b6450;
+    --line: #e7dcb8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+  h1 { font-size: 1.6rem; margin: 0.4rem 0 0.2rem; }
+  p.sub { color: var(--ink-soft); margin: 0 0 1.4rem; }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 1rem 1.1rem; margin: 0.9rem 0;
+  }
+  h2 { font-size: 1.15rem; margin: 0 0 0.5rem; }
+  a { color: var(--yellow-deep); }
+  footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line);
+           color: var(--ink-soft); font-size: 0.85rem; text-align: center; }
+  footer .logotype { font-weight: 700; letter-spacing: 0.02em; color: var(--ink); }
+</style>
+
+<div class="wrap">
+  <h1>The story of Lemonade Stand</h1>
+  <p class="sub">An honest note on where this game comes from.</p>
+
+  <div class="panel">
+    <h2>1973, in Minnesota</h2>
+    <p>
+      The original <em>Lemonade Stand</em> was written in <strong>1973 by Bob Jamison</strong>
+      of the <strong>Minnesota Educational Computing Consortium (MECC)</strong> — the same public
+      outfit that later gave classrooms <em>The Oregon Trail</em>. It began life on a timeshared
+      mainframe as a teaching program, not a product.
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>1979, on the Apple II</h2>
+    <p>
+      MECC brought it to the <strong>Apple II in 1979</strong>, and there it became a staple of
+      school computer labs for a generation. Behind the simple prompts it taught real economics:
+      <strong>supply and demand, weather risk, the cost of advertising, and profit</strong> — the
+      quiet lesson that cups you make but don't sell are money poured out on the sidewalk.
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>What this version is</h2>
+    <p>
+      This is an <strong>homage reimplementation</strong> by the Bussetech Software Studio. It rebuilds
+      the <em>public game mechanics</em> — weather, price, advertising, and a demand curve — from
+      scratch, clean-room. It is <strong>not a copy of any original code or assets</strong>; it simply
+      honors an idea that taught a lot of people their first lesson in running a small business.
+    </p>
+    <p>
+      What changed in the port: it runs on the modern web, works on a phone, tracks money in whole
+      cents so there are no rounding bugs, and adds one bit of studio charm — a rotating
+      <strong>studio-gnome attendant</strong> who works the stand each day. The gnome is display only;
+      the game reads that data and never writes back to it.
+    </p>
+  </div>
+
+  <p><a href="index.html">&larr; Back to the stand</a></p>
+
+  <footer>
+    <div><span class="logotype">bussetech</span> | software studio</div>
+  </footer>
+</div>

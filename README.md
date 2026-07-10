@@ -6,18 +6,25 @@
 
 Lemonade Stand — a modern, mobile web homage to the classic MECC educational business game (1973). Faithful mechanics, clean-room and respectfully attributed; the day's stand is worked by a rotating studio gnome.
 
-A [Bussetech Software Studio](https://bussetech.com) project: a static site
-(Jekyll, shared studio theme) rendered from text-based data stores.
+A [Bussetech Software Studio](https://bussetech.com) project: a small,
+self-contained web game — the studio's **c-archetype build 1** (a clean-room
+homage to a public educational classic). Play it at
+<https://lemonade.bussetech.com>.
 
 ## Layout
 
 | path | what |
 | --- | --- |
-| `data/` | the datasets — JSON/YAML/CSV/Markdown, versioned in git |
-| `schema/` | JSON Schemas; CI validates `data/<name>.*` against `schema/<name>.schema.json` |
-| `_posts/` | site posts — each one becomes a `/feed.json` item the studio portal aggregates |
-| `gnomes/` | project gnome directories (stub — see `gnomes/README.md`) |
+| `index.html` | the game — self-contained (inline CSS + vanilla JS), no external assets, plays offline |
+| `history.html` | honest history of the 1973 MECC original and this homage port |
+| `igotchi.snapshot.json` | display snapshot of studio gnomes; the day's stand is worked by one (render-side only) |
+| `docs/founding/` | licensing determination, design survey, founding record |
+| `_posts/` | site posts — each becomes a `/feed.json` item the studio portal aggregates |
 | `.github/workflows/` | thin callers into the studio's shared CI + the Pages deploy |
+
+The mechanics (weather, price, advertising, demand, spoilage) are a clean-room
+reimplementation of public game ideas — no original code or assets were used.
+See `docs/founding/licensing.md`.
 
 ## Build locally
 
