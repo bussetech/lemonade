@@ -1,0 +1,10 @@
+[
+  { "display_name": "Gnome Backlog Refiner", "stage": "novice", "glyph": "○", "knoll": "studio" },
+  { "display_name": "Gnome Desk Clerk", "stage": "apprentice", "glyph": "◔", "knoll": "desk" },
+  { "display_name": "Gnome Info Scout", "stage": "apprentice", "glyph": "◔", "knoll": "info" },
+  { "display_name": "Gnome GTM Planner", "stage": "apprentice", "glyph": "◔", "knoll": "gtm" },
+  { "display_name": "Gnome Guidance Scribe", "stage": "journeyman", "glyph": "◑", "knoll": "studio" },
+  { "display_name": "Gnome Ledger Scribe", "stage": "journeyman", "glyph": "◑", "knoll": "studio" },
+  { "display_name": "Gnome GTM Copywriter", "stage": "journeyman", "glyph": "◑", "knoll": "gtm" },
+  { "display_name": "Gnome Portal Editor", "stage": "craftsman", "glyph": "◕", "knoll": null }
+]

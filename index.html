@@ -1,0 +1,394 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lemonade Stand — Bussetech Software Studio</title>
+
+<!--
+  Lemonade Stand — an homage reimplementation of the 1973 MECC classic.
+  Clean-room: the mechanics (weather, price, advertising, demand) are public
+  game ideas, rebuilt from scratch. No original code or assets were used.
+  Self-contained: inline CSS + vanilla JS, no libraries, no network calls.
+  Runs from a file:// open or served statically from GitHub Pages.
+-->
+
+<style>
+  :root {
+    /* warm lemonade palette: cream ground, yellow accents, dark ink text */
+    --cream: #fff9e6;
+    --panel: #fffdf5;
+    --yellow: #f6c944;
+    --yellow-deep: #e0a80f;
+    --ink: #2b2617;
+    --ink-soft: #6b6450;
+    --line: #e7dcb8;
+    --good: #2f7a3f;
+    --bad: #b0402c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+  header h1 { margin: 0.4rem 0 0.1rem; font-size: 1.6rem; }
+  header p.sub { margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.95rem; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 0.8rem 0;
+  }
+  .panel h2 { margin: 0 0 0.6rem; font-size: 1.15rem; }
+  .row { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.15rem 0; }
+  .row .k { color: var(--ink-soft); }
+  .row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .attendant {
+    display: flex; align-items: center; gap: 0.7rem;
+    background: #fff4cf; border: 1px solid var(--line);
+    border-radius: 12px; padding: 0.7rem 0.9rem; margin: 0.8rem 0;
+  }
+  .attendant .glyph { font-size: 2rem; line-height: 1; }
+  .attendant .who { font-size: 0.95rem; }
+  .attendant .who strong { display: block; }
+  .attendant .who .stage { color: var(--ink-soft); font-size: 0.85rem; }
+  .weather-big { font-size: 1.3rem; font-weight: 700; margin: 0.2rem 0; }
+  .weather-note { color: var(--ink-soft); font-size: 0.9rem; }
+  label { display: block; margin: 0.7rem 0 0.2rem; font-weight: 600; }
+  label .hint { font-weight: 400; color: var(--ink-soft); font-size: 0.85rem; }
+  input[type="number"] {
+    width: 100%; font-size: 1.1rem; padding: 0.6rem;
+    border: 1px solid var(--line); border-radius: 10px; background: #fff;
+    color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .cost-preview { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--ink-soft); }
+  button {
+    font-size: 1.05rem; font-weight: 700; cursor: pointer;
+    border: none; border-radius: 10px; padding: 0.8rem 1rem;
+    background: var(--yellow); color: var(--ink);
+    width: 100%; margin-top: 0.9rem;
+    min-height: 48px; /* large tap target */
+  }
+  button:hover { background: var(--yellow-deep); }
+  button.secondary { background: transparent; border: 1px solid var(--yellow-deep); }
+  .event { background: #fff0d6; border-left: 4px solid var(--yellow-deep);
+           padding: 0.6rem 0.8rem; border-radius: 8px; margin: 0.6rem 0; font-size: 0.95rem; }
+  .profit-good { color: var(--good); }
+  .profit-bad { color: var(--bad); }
+  .muted { color: var(--ink-soft); font-size: 0.9rem; }
+  table.ledger { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.5rem; }
+  table.ledger th, table.ledger td { text-align: right; padding: 0.3rem 0.35rem; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  table.ledger th:first-child, table.ledger td:first-child { text-align: left; }
+  footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line);
+           color: var(--ink-soft); font-size: 0.85rem; text-align: center; }
+  footer .logotype { font-weight: 700; letter-spacing: 0.02em; color: var(--ink); }
+  a { color: var(--yellow-deep); }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Lemonade Stand</h1>
+    <p class="sub">Set your price, watch the weather, turn a profit. A 7-day run.</p>
+  </header>
+
+  <!-- Today's attendant: a studio gnome working the shift. -->
+  <!-- igotchi firewall: render-side only. The game READS igotchi display data; nothing flows back into the workforce. -->
+  <div class="attendant" id="attendant" aria-live="polite" hidden>
+    <span class="glyph" id="att-glyph" aria-hidden="true">○</span>
+    <span class="who">
+      <strong id="att-name">—</strong>
+      <span class="stage" id="att-stage"></span>
+    </span>
+  </div>
+
+  <main id="game" aria-live="polite"></main>
+
+  <footer>
+    <div><span class="logotype">bussetech</span> | software studio</div>
+    <div style="margin-top:0.3rem"><a href="history.html">The story of Lemonade Stand &rarr;</a></div>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+// ---------------------------------------------------------------------------
+// Lemonade Stand — a small, honest business sim. Money is tracked in integer
+// cents throughout so there are no floating-point money bugs. The model is
+// meant to be read: weather sets demand, price pushes it down, ads nudge it
+// up (with diminishing returns), and unsold cups spoil. That last part is
+// the whole lesson.
+// ---------------------------------------------------------------------------
+
+// --- Tunable constants -----------------------------------------------------
+var START_CASH   = 200;   // $2.00, in cents
+var TOTAL_DAYS   = 7;
+var INGREDIENT   = 8;     // cents to make one cup (lemons + sugar + cups + ice)
+var SIGN_COST    = 15;    // cents per advertising sign
+var MAX_SIGNS    = 8;
+
+// Weather types. mult = base demand multiplier. Hot-and-dry sells the most;
+// thunderstorms can wash the day out entirely.
+var WEATHER = {
+  sunny:         { label: "Sunny",          mult: 1.00, note: "Good lemonade weather." },
+  hazy:          { label: "Hazy",           mult: 0.85, note: "A muggy, in-between sort of day." },
+  hotdry:        { label: "Hot and dry",    mult: 1.45, note: "Thirsty crowds. Your best shot." },
+  cloudy:        { label: "Cloudy",         mult: 0.70, note: "Fewer people out and about." },
+  thunderstorms: { label: "Thunderstorms",  mult: 0.20, note: "Rough day to sell on the street." }
+};
+var WEATHER_KEYS = ["sunny", "hazy", "hotdry", "cloudy", "thunderstorms"];
+
+// --- Game state ------------------------------------------------------------
+var state = {
+  day: 1,
+  cash: START_CASH,
+  weather: null,
+  gnomes: [],
+  ledger: []   // one entry per completed day
+};
+
+// Graceful inline fallback so the game plays when opened as a file:// URL,
+// where fetch() of the snapshot may be blocked by the browser.
+var FALLBACK_GNOMES = [
+  { display_name: "Gnome Portal Editor",  stage: "craftsman",   glyph: "◕", knoll: null },
+  { display_name: "Gnome Guidance Scribe", stage: "journeyman", glyph: "◑", knoll: "studio" },
+  { display_name: "Gnome Desk Clerk",      stage: "apprentice", glyph: "◔", knoll: "desk" },
+  { display_name: "Gnome Backlog Refiner", stage: "novice",     glyph: "○", knoll: "studio" }
+];
+
+// --- Money helpers ---------------------------------------------------------
+function cents(n) { return "$" + (n / 100).toFixed(2); }
+
+// --- Random helpers --------------------------------------------------------
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function rand(lo, hi) { return lo + Math.random() * (hi - lo); }
+
+// --- Random one-day events. Each returns a demand multiplier and a one-line
+// explanation, or null for "nothing unusual happened today". Kept to a small
+// handful, as in the original. -------------------------------------------
+function rollEvent(weatherKey) {
+  var r = Math.random();
+  if (r < 0.10) return { mult: 1.6,  text: "A heat wave rolls in — everyone wants a cold drink!" };
+  if (r < 0.18) return { mult: 0.0,  text: "A sudden thunderstorm washes out the afternoon. No sales today." };
+  if (r < 0.26) return { mult: 0.5,  text: "The street out front got torn up for repairs — foot traffic is way down." };
+  if (r < 0.34) return { mult: 0.7,  text: "A competitor opened a stand down the block and split the crowd." };
+  if (r < 0.40) return { mult: 1.25, text: "A parade came through and left thirsty crowds behind." };
+  return null; // an ordinary day
+}
+
+// --- Demand model ----------------------------------------------------------
+// Readable on purpose. Start from a base crowd, scale by weather, bend down
+// for price (simple elasticity around a 25-cent reference), nudge up for ads
+// with diminishing returns, then apply the day's event and a little noise.
+function demandFor(priceCents, signs, weatherKey, event) {
+  var BASE_CROWD = 60;                       // cups wanted at reference price, sunny, no ads
+  var base = BASE_CROWD * WEATHER[weatherKey].mult;
+
+  // Price sensitivity: at the 25-cent reference, factor = 1. Cheaper sells
+  // more, dearer sells less. Clamped so silly inputs stay sane.
+  var priceFactor = Math.pow(25 / Math.max(priceCents, 1), 1.1);
+  priceFactor = Math.max(0.05, Math.min(priceFactor, 2.5));
+
+  // Advertising: each sign helps less than the one before (sqrt curve),
+  // up to roughly a +60% ceiling.
+  var adFactor = 1 + 0.6 * (Math.sqrt(signs) / Math.sqrt(MAX_SIGNS));
+
+  var noise = rand(0.85, 1.15);
+  var eventMult = event ? event.mult : 1;
+
+  var demand = base * priceFactor * adFactor * noise * eventMult;
+  return Math.max(0, Math.round(demand));
+}
+
+// --- Gnome shift -----------------------------------------------------------
+// Pure render. day N shows gnomes[N % len] "working the stand today". This
+// only ever READS gnome display data; nothing is written back anywhere.
+function renderAttendant() {
+  var list = state.gnomes.length ? state.gnomes : FALLBACK_GNOMES;
+  var g = list[(state.day - 1) % list.length];
+  var box = document.getElementById("attendant");
+  document.getElementById("att-glyph").textContent = g.glyph || "○";
+  document.getElementById("att-name").textContent = g.display_name;
+  var where = g.knoll ? " · " + g.knoll + " knoll" : "";
+  document.getElementById("att-stage").textContent =
+    g.stage + " · working the stand today" + where;
+  box.hidden = false;
+}
+
+// --- Screens ---------------------------------------------------------------
+var game = document.getElementById("game");
+
+function startDay() {
+  state.weather = pick(WEATHER_KEYS);
+  renderAttendant();
+  var w = WEATHER[state.weather];
+
+  game.innerHTML =
+    '<div class="panel">' +
+      '<h2>Day ' + state.day + ' of ' + TOTAL_DAYS + '</h2>' +
+      '<div class="row"><span class="k">Cash on hand</span><span class="v">' + cents(state.cash) + '</span></div>' +
+      '<hr style="border:none;border-top:1px solid var(--line);margin:0.6rem 0">' +
+      '<div class="muted">Weather forecast</div>' +
+      '<div class="weather-big">' + w.label + '</div>' +
+      '<div class="weather-note">' + w.note + '</div>' +
+    '</div>' +
+
+    '<div class="panel">' +
+      '<h2>Plan your day</h2>' +
+      '<div class="muted">Each cup costs ' + cents(INGREDIENT) + ' to make. Each sign costs ' + cents(SIGN_COST) + '.</div>' +
+
+      '<label for="price">Price per cup <span class="hint">(cents)</span></label>' +
+      '<input type="number" id="price" inputmode="numeric" min="1" max="100" step="1" value="25">' +
+
+      '<label for="cups">Cups to make <span class="hint">(unsold cups spoil)</span></label>' +
+      '<input type="number" id="cups" inputmode="numeric" min="0" step="1" value="20">' +
+
+      '<label for="signs">Advertising signs <span class="hint">(0 to ' + MAX_SIGNS + ', diminishing returns)</span></label>' +
+      '<input type="number" id="signs" inputmode="numeric" min="0" max="' + MAX_SIGNS + '" step="1" value="1">' +
+
+      '<p class="cost-preview" id="cost-preview"></p>' +
+      '<p class="cost-preview" id="cost-error" style="color:var(--bad)" role="alert"></p>' +
+
+      '<button id="open-btn">Open the stand</button>' +
+    '</div>';
+
+  var priceEl = document.getElementById("price");
+  var cupsEl  = document.getElementById("cups");
+  var signsEl = document.getElementById("signs");
+  var preview = document.getElementById("cost-preview");
+  var errEl   = document.getElementById("cost-error");
+
+  function readInputs() {
+    return {
+      price: Math.max(1, Math.floor(Number(priceEl.value) || 0)),
+      cups:  Math.max(0, Math.floor(Number(cupsEl.value) || 0)),
+      signs: Math.max(0, Math.min(MAX_SIGNS, Math.floor(Number(signsEl.value) || 0)))
+    };
+  }
+  function updatePreview() {
+    var v = readInputs();
+    var cost = v.cups * INGREDIENT + v.signs * SIGN_COST;
+    preview.textContent = "Today's outlay: " + cents(cost) +
+      " (" + v.cups + " cups + " + v.signs + " signs). Cash after: " + cents(state.cash - cost) + ".";
+    if (cost > state.cash) {
+      errEl.textContent = "You can't afford that — reduce cups or signs.";
+    } else {
+      errEl.textContent = "";
+    }
+  }
+  priceEl.addEventListener("input", updatePreview);
+  cupsEl.addEventListener("input", updatePreview);
+  signsEl.addEventListener("input", updatePreview);
+  updatePreview();
+
+  document.getElementById("open-btn").addEventListener("click", function () {
+    var v = readInputs();
+    var cost = v.cups * INGREDIENT + v.signs * SIGN_COST;
+    if (cost > state.cash) { updatePreview(); return; } // block: can't spend what you don't have
+    runDay(v.price, v.cups, v.signs, cost);
+  });
+}
+
+function runDay(price, cups, signs, cost) {
+  state.cash -= cost; // pay for ingredients and signs up front
+
+  var event = rollEvent(state.weather);
+  var demanded = demandFor(price, signs, state.weather, event);
+  var sold = Math.min(cups, demanded);
+  var revenue = sold * price;
+  state.cash += revenue;
+  var profit = revenue - cost;
+
+  state.ledger.push({
+    day: state.day, weather: WEATHER[state.weather].label,
+    made: cups, sold: sold, revenue: revenue, cost: cost, profit: profit, cash: state.cash
+  });
+
+  var profitClass = profit >= 0 ? "profit-good" : "profit-bad";
+  var eventHtml = event ? '<div class="event">' + event.text + '</div>' : '';
+
+  game.innerHTML =
+    '<div class="panel">' +
+      '<h2>Day ' + state.day + ' results — ' + WEATHER[state.weather].label + '</h2>' +
+      eventHtml +
+      '<div class="row"><span class="k">Cups made</span><span class="v">' + cups + '</span></div>' +
+      '<div class="row"><span class="k">Cups sold</span><span class="v">' + sold + '</span></div>' +
+      (cups > sold ? '<div class="row"><span class="k">Spoiled (unsold)</span><span class="v">' + (cups - sold) + '</span></div>' : '') +
+      '<div class="row"><span class="k">Revenue</span><span class="v">' + cents(revenue) + '</span></div>' +
+      '<div class="row"><span class="k">Costs</span><span class="v">' + cents(cost) + '</span></div>' +
+      '<div class="row"><span class="k">Profit</span><span class="v ' + profitClass + '">' + cents(profit) + '</span></div>' +
+      '<hr style="border:none;border-top:1px solid var(--line);margin:0.6rem 0">' +
+      '<div class="row"><span class="k">Cash on hand</span><span class="v">' + cents(state.cash) + '</span></div>' +
+      '<button id="next-btn">' + (state.day >= TOTAL_DAYS ? "See final results" : "Next day") + '</button>' +
+    '</div>';
+
+  document.getElementById("next-btn").addEventListener("click", function () {
+    if (state.day >= TOTAL_DAYS) {
+      endGame();
+    } else {
+      state.day += 1;
+      startDay();
+    }
+  });
+}
+
+function endGame() {
+  document.getElementById("attendant").hidden = true;
+  var totalProfit = state.cash - START_CASH;
+  var cls = totalProfit >= 0 ? "profit-good" : "profit-bad";
+
+  var summary;
+  if (totalProfit > 300)      summary = "A tidy little business. You read the weather and priced it well.";
+  else if (totalProfit > 0)   summary = "In the black. Steady hands run a steady stand.";
+  else if (totalProfit === 0) summary = "You broke even — no small feat with weather like that.";
+  else                        summary = "In the red this week. Spoiled cups and thin crowds add up. Try again.";
+
+  var rows = state.ledger.map(function (e) {
+    return '<tr><td>' + e.day + '</td><td>' + e.weather + '</td><td>' + e.made + '</td><td>' +
+           e.sold + '</td><td>' + cents(e.revenue) + '</td><td>' + cents(e.profit) + '</td><td>' + cents(e.cash) + '</td></tr>';
+  }).join("");
+
+  game.innerHTML =
+    '<div class="panel">' +
+      '<h2>' + TOTAL_DAYS + ' days done</h2>' +
+      '<div class="row"><span class="k">Started with</span><span class="v">' + cents(START_CASH) + '</span></div>' +
+      '<div class="row"><span class="k">Ended with</span><span class="v">' + cents(state.cash) + '</span></div>' +
+      '<div class="row"><span class="k">Total profit</span><span class="v ' + cls + '">' + cents(totalProfit) + '</span></div>' +
+      '<p class="muted" style="margin-top:0.8rem">' + summary + '</p>' +
+      '<div style="overflow-x:auto"><table class="ledger">' +
+        '<caption class="visually-hidden">Daily results for the run</caption>' +
+        '<tr><th>Day</th><th>Weather</th><th>Made</th><th>Sold</th><th>Revenue</th><th>Profit</th><th>Cash</th></tr>' +
+        rows +
+      '</table></div>' +
+      '<button id="again-btn" class="secondary">Play again</button>' +
+    '</div>';
+
+  document.getElementById("again-btn").addEventListener("click", resetGame);
+}
+
+function resetGame() {
+  state.day = 1;
+  state.cash = START_CASH;
+  state.weather = null;
+  state.ledger = [];
+  startDay();
+}
+
+// --- Boot ------------------------------------------------------------------
+// Try to load the bundled gnome snapshot. If fetch fails (e.g. opened as a
+// file:// URL where the browser blocks it), fall back to the inline array so
+// the game always plays. Either way, the game only READS this data.
+function boot() {
+  fetch("igotchi.snapshot.json")
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (data) {
+      if (Array.isArray(data) && data.length) state.gnomes = data;
+    })
+    .catch(function () { /* offline / file:// — fallback array is used */ })
+    .then(function () { resetGame(); });
+}
+boot();
+</script>
