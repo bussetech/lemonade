@@ -33,6 +33,10 @@ studio:
   nav:
     - title: Home
       url: /
+    - title: The story
+      url: /history.html
+    - title: Data
+      url: /data/
 
 markdown: kramdown
 sass:
