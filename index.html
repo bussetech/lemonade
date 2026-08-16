@@ -1,17 +1,26 @@
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lemonade Stand — Bussetech Software Studio</title>
+---
+layout: home
+title: Lemonade Stand
+description: "Set your price, watch the weather, turn a profit. A 7-day run."
+---
 
 <!--
   Lemonade Stand — an homage reimplementation of the 1973 MECC classic.
   Clean-room: the mechanics (weather, price, advertising, demand) are public
   game ideas, rebuilt from scratch. No original code or assets were used.
   Self-contained: inline CSS + vanilla JS, no libraries, no network calls.
-  Runs from a file:// open or served statically from GitHub Pages.
+
+  The game renders INSIDE the studio theme (`layout: home`) so the masthead,
+  the footer attribution, and the route back to the studio are present on the
+  project's front door — they were lost when the game replaced the templated
+  index.md at founding (platform lemonade#4). Every game style below is
+  scoped to `.lemonade-game` so the game's palette can never reach the site
+  chrome, and the game's custom properties are declared on that container
+  rather than `:root` so they cannot collide with the theme's.
 -->
 
 <style>
-  :root {
+  .lemonade-game {
     /* warm lemonade palette: cream ground, yellow accents, dark ink text */
     --cream: #fff9e6;
     --panel: #fffdf5;
@@ -22,94 +31,92 @@
     --line: #e7dcb8;
     --good: #2f7a3f;
     --bad: #b0402c;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
+
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--cream);
     color: var(--ink);
     line-height: 1.5;
+    border: 1px solid var(--line);
+    border-radius: 14px;
   }
-  .wrap { max-width: 640px; margin: 0 auto; padding: 1rem 1rem 3rem; }
-  header h1 { margin: 0.4rem 0 0.1rem; font-size: 1.6rem; }
-  header p.sub { margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.95rem; }
-  .panel {
+  .lemonade-game, .lemonade-game * { box-sizing: border-box; }
+  .lemonade-game .wrap { max-width: 640px; margin: 0 auto; padding: 1rem 1rem 2rem; }
+  .lemonade-game .panel {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 12px;
     padding: 1rem;
     margin: 0.8rem 0;
   }
-  .panel h2 { margin: 0 0 0.6rem; font-size: 1.15rem; }
-  .row { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.15rem 0; }
-  .row .k { color: var(--ink-soft); }
-  .row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
-  .attendant {
+  .lemonade-game .panel h2 { margin: 0 0 0.6rem; font-size: 1.15rem; }
+  .lemonade-game .row { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.15rem 0; }
+  .lemonade-game .row .k { color: var(--ink-soft); }
+  .lemonade-game .row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .lemonade-game .attendant {
     display: flex; align-items: center; gap: 0.7rem;
     background: #fff4cf; border: 1px solid var(--line);
     border-radius: 12px; padding: 0.7rem 0.9rem; margin: 0.8rem 0;
   }
-  .attendant .glyph { font-size: 2rem; line-height: 1; }
-  .attendant .who { font-size: 0.95rem; }
-  .attendant .who strong { display: block; }
-  .attendant .who .stage { color: var(--ink-soft); font-size: 0.85rem; }
-  .weather-big { font-size: 1.3rem; font-weight: 700; margin: 0.2rem 0; }
-  .weather-note { color: var(--ink-soft); font-size: 0.9rem; }
-  label { display: block; margin: 0.7rem 0 0.2rem; font-weight: 600; }
-  label .hint { font-weight: 400; color: var(--ink-soft); font-size: 0.85rem; }
-  input[type="number"] {
+  .lemonade-game .attendant .glyph { font-size: 2rem; line-height: 1; }
+  .lemonade-game .attendant .who { font-size: 0.95rem; }
+  .lemonade-game .attendant .who strong { display: block; }
+  .lemonade-game .attendant .who .stage { color: var(--ink-soft); font-size: 0.85rem; }
+  .lemonade-game .weather-big { font-size: 1.3rem; font-weight: 700; margin: 0.2rem 0; }
+  .lemonade-game .weather-note { color: var(--ink-soft); font-size: 0.9rem; }
+  .lemonade-game label { display: block; margin: 0.7rem 0 0.2rem; font-weight: 600; }
+  .lemonade-game label .hint { font-weight: 400; color: var(--ink-soft); font-size: 0.85rem; }
+  .lemonade-game input[type="number"] {
     width: 100%; font-size: 1.1rem; padding: 0.6rem;
     border: 1px solid var(--line); border-radius: 10px; background: #fff;
     color: var(--ink); font-variant-numeric: tabular-nums;
   }
-  .cost-preview { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--ink-soft); }
-  button {
+  .lemonade-game .cost-preview { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--ink-soft); }
+  .lemonade-game button {
     font-size: 1.05rem; font-weight: 700; cursor: pointer;
     border: none; border-radius: 10px; padding: 0.8rem 1rem;
     background: var(--yellow); color: var(--ink);
     width: 100%; margin-top: 0.9rem;
     min-height: 48px; /* large tap target */
   }
-  button:hover { background: var(--yellow-deep); }
-  button.secondary { background: transparent; border: 1px solid var(--yellow-deep); }
-  .event { background: #fff0d6; border-left: 4px solid var(--yellow-deep);
+  .lemonade-game button:hover { background: var(--yellow-deep); }
+  .lemonade-game button.secondary { background: transparent; border: 1px solid var(--yellow-deep); }
+  .lemonade-game .event { background: #fff0d6; border-left: 4px solid var(--yellow-deep);
            padding: 0.6rem 0.8rem; border-radius: 8px; margin: 0.6rem 0; font-size: 0.95rem; }
-  .profit-good { color: var(--good); }
-  .profit-bad { color: var(--bad); }
-  .muted { color: var(--ink-soft); font-size: 0.9rem; }
-  table.ledger { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.5rem; }
-  table.ledger th, table.ledger td { text-align: right; padding: 0.3rem 0.35rem; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
-  table.ledger th:first-child, table.ledger td:first-child { text-align: left; }
-  footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line);
+  .lemonade-game .profit-good { color: var(--good); }
+  .lemonade-game .profit-bad { color: var(--bad); }
+  .lemonade-game .muted { color: var(--ink-soft); font-size: 0.9rem; }
+  .lemonade-game table.ledger { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.5rem; }
+  .lemonade-game table.ledger th, .lemonade-game table.ledger td { text-align: right; padding: 0.3rem 0.35rem; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  .lemonade-game table.ledger th:first-child, .lemonade-game table.ledger td:first-child { text-align: left; }
+  .lemonade-game .game-note { margin: 1.4rem 0 0; padding-top: 0.9rem;
+           border-top: 1px solid var(--line);
            color: var(--ink-soft); font-size: 0.85rem; text-align: center; }
-  footer .logotype { font-weight: 700; letter-spacing: 0.02em; color: var(--ink); }
-  a { color: var(--yellow-deep); }
-  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .lemonade-game a { color: var(--yellow-deep); }
+  .lemonade-game .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
 
-<div class="wrap">
-  <header>
-    <h1>Lemonade Stand</h1>
-    <p class="sub">Set your price, watch the weather, turn a profit. A 7-day run.</p>
-  </header>
+<!--
+  The page title and standfirst come from this page's front matter, rendered
+  by the theme's `home` layout — the game no longer prints its own <h1>, and
+  the site chrome (masthead, footer attribution) wraps everything below.
+-->
+<div class="lemonade-game">
+  <div class="wrap">
+    <!-- Today's attendant: a studio gnome working the shift. -->
+    <!-- igotchi firewall: render-side only. The game READS igotchi display data; nothing flows back into the workforce. -->
+    <div class="attendant" id="attendant" aria-live="polite" hidden>
+      <span class="glyph" id="att-glyph" aria-hidden="true">○</span>
+      <span class="who">
+        <strong id="att-name">—</strong>
+        <span class="stage" id="att-stage"></span>
+      </span>
+    </div>
 
-  <!-- Today's attendant: a studio gnome working the shift. -->
-  <!-- igotchi firewall: render-side only. The game READS igotchi display data; nothing flows back into the workforce. -->
-  <div class="attendant" id="attendant" aria-live="polite" hidden>
-    <span class="glyph" id="att-glyph" aria-hidden="true">○</span>
-    <span class="who">
-      <strong id="att-name">—</strong>
-      <span class="stage" id="att-stage"></span>
-    </span>
+    <!-- Deliberately a div: the theme's layout already owns the page's main landmark. -->
+    <div id="game" aria-live="polite"></div>
+
+    <p class="game-note"><a href="{{ '/history.html' | relative_url }}">The story of Lemonade Stand &rarr;</a></p>
   </div>
-
-  <main id="game" aria-live="polite"></main>
-
-  <footer>
-    <div><span class="logotype">bussetech</span> | software studio</div>
-    <div style="margin-top:0.3rem"><a href="history.html">The story of Lemonade Stand &rarr;</a></div>
-  </footer>
 </div>
 
 <script>
